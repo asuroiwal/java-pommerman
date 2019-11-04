@@ -1,5 +1,7 @@
 import core.Game;
 import players.*;
+import players.PlayerTeamG.PlayerTeamG;
+import players.PlayerTeamG.PlayerTeamGParams;
 import utils.Types;
 import players.rhea.utils.Constants;
 import players.mcts.MCTSPlayer;
@@ -20,7 +22,7 @@ public class Test {
         Types.GAME_MODE gameMode = Types.GAME_MODE.FFA;
         boolean useSeparateThreads = false;
 
-        Game game = new Game(seed, boardSize, Types.GAME_MODE.FFA, "");
+        Game game = new Game(seed, boardSize, Types.GAME_MODE.TEAM, "");
 
         // Key controllers for human player s (up to 2 so far).
         KeyController ki1 = new KeyController(true);
@@ -28,23 +30,32 @@ public class Test {
 
         // Create players
         ArrayList<Player> players = new ArrayList<>();
+
         int playerID = Types.TILETYPE.AGENT0.getKey();
 
+        //Creating Team G Player
+        PlayerTeamGParams playerTeamGParams = new PlayerTeamGParams();
+        playerTeamGParams.stop_type = playerTeamGParams.STOP_ITERATIONS;
+        playerTeamGParams.heuristic_method = playerTeamGParams.CUSTOM_HEURISTIC;
+        players.add(new PlayerTeamG(seed, playerID++, playerTeamGParams));
+
+        //Creating RHEA Player
+        RHEAParams rheaParams = new RHEAParams();
+        rheaParams.heurisic_type = Constants.CUSTOM_HEURISTIC;
+        players.add(new RHEAPlayer(seed, playerID++, rheaParams));
+
+        //Creating Simple Player
+        players.add(new SimplePlayer(seed, playerID++));
+
+        //Creating MCTS Player
         MCTSParams mctsParams = new MCTSParams();
         mctsParams.stop_type = mctsParams.STOP_ITERATIONS;
         mctsParams.heuristic_method = mctsParams.CUSTOM_HEURISTIC;
-
-        RHEAParams rheaParams = new RHEAParams();
-        rheaParams.heurisic_type = Constants.CUSTOM_HEURISTIC;
-
         players.add(new MCTSPlayer(seed, playerID++, mctsParams));
-        //players.add(new MCTSPlayer(seed, playerID++, mctsParams));
 
-//        players.add(new SimplePlayer(seed, playerID++));
-        players.add(new RHEAPlayer(seed, playerID++, rheaParams));
-//        players.add(new SimplePlayer(seed, playerID++));
-        players.add(new MCTSPlayer(seed, playerID++, new MCTSParams()));
-        players.add(new RHEAPlayer(seed, playerID++, rheaParams));
+        //players.add(new SimplePlayer(seed, playerID++));
+        //players.add(new MCTSPlayer(seed, playerID++, mctsParams));
+        //players.add(new HumanPlayer(ki1, playerID));
 
         // Make sure we have exactly NUM_PLAYERS players
         assert players.size() == Types.NUM_PLAYERS : "There should be " + Types.NUM_PLAYERS +
